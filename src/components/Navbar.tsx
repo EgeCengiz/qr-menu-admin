@@ -1,9 +1,9 @@
 import React from 'react';
-import { Film, FolderTree, LogOut, RotateCcw } from 'lucide-react';
+import { Film, FolderTree, LogOut, RotateCcw, Store } from 'lucide-react';
 
 interface NavbarProps {
-  activeTab: 'menuTree' | 'welcome';
-  setActiveTab: (tab: 'menuTree' | 'welcome') => void;
+  activeTab: 'menuTree' | 'welcome' | 'storeSettings';
+  setActiveTab: (tab: 'menuTree' | 'welcome' | 'storeSettings') => void;
   onLogout: () => void;
   onResetDefaults: () => void;
   totalCategories: number;
@@ -78,7 +78,19 @@ export const Navbar: React.FC<NavbarProps> = ({
               }`}
             >
               <Film className="w-4 h-4" />
-              <span>Welcome GIF/Video</span>
+              <span>Welcome Video</span>
+            </button>
+
+            <button
+              onClick={() => setActiveTab('storeSettings')}
+              className={`flex items-center gap-2 px-3 py-1.5 sm:px-4 sm:py-2 rounded-lg text-xs font-semibold transition-all duration-200 cursor-pointer ${
+                activeTab === 'storeSettings'
+                  ? 'bg-gradient-to-r from-[#8b5a2b] to-[#c8a165] text-[#0d0a08] font-bold shadow-md'
+                  : 'text-[#a0907a] hover:text-[#e2d8c3] hover:bg-[#1a1511]'
+              }`}
+            >
+              <Store className="w-4 h-4" />
+              <span>İletişim & Saatler</span>
             </button>
           </nav>
 

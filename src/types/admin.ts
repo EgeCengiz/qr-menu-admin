@@ -29,7 +29,8 @@ export interface Category {
 }
 
 export interface WelcomeMedia {
-  videoUrl: string;
+  id?: number;
+  videoUrl?: string | null;
   posterImg: string;
   title: string;
   subtitle: string;
@@ -41,3 +42,18 @@ export interface AdminUser {
   token: string;
   loginTime: string;
 }
+
+export interface StoreSettings {
+  storeName: string;
+  title: string;
+  addressLine1: string;
+  addressLine2: string;
+  workingHours: string;
+  breakfastWeekdays: string;
+  breakfastWeekends: string;
+  phone: string;
+  phoneDisplay: string;
+  googleMapsUrl: string;
+  note: string;
+}
+

@@ -1,18 +1,19 @@
 import React, { useState } from 'react';
 import { Lock, User, Eye, EyeOff, LogIn } from 'lucide-react';
+import { apiLogin } from '../api/apiClient';
 
 interface LoginProps {
-  onLoginSuccess: (username: string) => void;
+  onLoginSuccess: (username: string, token: string) => void;
 }
 
 export const Login: React.FC<LoginProps> = ({ onLoginSuccess }) => {
   const [username, setUsername] = useState('admin');
-  const [password, setPassword] = useState('123456');
+  const [password, setPassword] = useState('hookahlab2024');
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState('');
   const [isLoading, setIsLoading] = useState(false);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
 
@@ -23,9 +24,19 @@ export const Login: React.FC<LoginProps> = ({ onLoginSuccess }) => {
 
     setIsLoading(true);
 
-    setTimeout(() => {
-      onLoginSuccess(username.trim());
-    }, 400);
+    try {
+      const result = await apiLogin(username.trim(), password.trim());
+      // Store JWT token
+      localStorage.setItem('hookahlab_jwt_token', result.access_token);
+      onLoginSuccess(result.username, result.access_token);
+    } catch (err: unknown) {
+      const message = err instanceof Error ? err.message : 'Giriş yapılamadı';
+      setError(message === 'Unauthorized' || message.includes('hatalı')
+        ? 'Kullanıcı adı veya şifre hatalı.'
+        : `Sunucuya bağlanılamadı. Backend çalışıyor mu? (${message})`);
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
@@ -119,7 +130,7 @@ export const Login: React.FC<LoginProps> = ({ onLoginSuccess }) => {
         </form>
 
         <p className="text-[10px] text-center text-[#6b5a4b]">
-          Demo Hesabı: <code className="text-[#c8a165]">admin / 123456</code>
+          Giriş: <code className="text-[#c8a165]">admin / hookahlab2024</code>
         </p>
 
       </div>

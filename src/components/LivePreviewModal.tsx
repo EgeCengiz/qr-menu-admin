@@ -117,7 +117,7 @@ export const LivePreviewModal: React.FC<LivePreviewModalProps> = ({
               className="relative w-full h-full flex flex-col justify-between p-5 pt-8 cursor-pointer overflow-hidden animate-fade-in"
             >
               {/* Background Media */}
-              {welcomeMedia.videoUrl.endsWith('.gif') || welcomeMedia.videoUrl.includes('giphy') ? (
+              {welcomeMedia.videoUrl && (welcomeMedia.videoUrl.endsWith('.gif') || welcomeMedia.videoUrl.includes('giphy')) ? (
                 <img
                   src={welcomeMedia.videoUrl}
                   alt="Welcome GIF"
@@ -125,7 +125,7 @@ export const LivePreviewModal: React.FC<LivePreviewModalProps> = ({
                 />
               ) : (
                 <video
-                  src={welcomeMedia.videoUrl}
+                  src={welcomeMedia.videoUrl ?? undefined}
                   poster={welcomeMedia.posterImg}
                   autoPlay
                   loop
@@ -329,7 +329,14 @@ export const LivePreviewModal: React.FC<LivePreviewModalProps> = ({
               {/* Items List */}
               <div className="p-3 space-y-3 pb-8">
                 {(selectedCategory.items || [])
-                  .filter((item) => selectedSubCat === 'all' || item.subCategory === selectedSubCat)
+                  .filter((item) => {
+                    if (selectedSubCat === 'all') return true;
+                    if (!item.subCategory) return false;
+                    const itemSub = item.subCategory;
+                    const itemShort = itemSub.includes('__') ? itemSub.split('__')[1] : itemSub;
+                    const selectedShort = selectedSubCat.includes('__') ? selectedSubCat.split('__')[1] : selectedSubCat;
+                    return itemSub === selectedSubCat || itemShort === selectedShort;
+                  })
                   .map((item) => (
                     <div
                       key={item.id}

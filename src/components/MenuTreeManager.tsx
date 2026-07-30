@@ -28,6 +28,7 @@ interface MenuTreeManagerProps {
   onReorderCategories: (newOrder: Category[]) => void;
   onSaveProduct: (categoryId: string, product: MenuItem) => void;
   onDeleteProduct: (categoryId: string, productId: number) => void;
+  onReorderProducts: (categoryId: string, reorderedProducts: MenuItem[]) => void;
   onSaveSubCategory: (categoryId: string, subCategory: SubCategory) => void;
   onDeleteSubCategory: (categoryId: string, subCategoryId: string) => void;
 }
@@ -39,6 +40,7 @@ export const MenuTreeManager: React.FC<MenuTreeManagerProps> = ({
   onReorderCategories,
   onSaveProduct,
   onDeleteProduct,
+  onReorderProducts,
   onSaveSubCategory,
   onDeleteSubCategory,
 }) => {
@@ -206,6 +208,25 @@ export const MenuTreeManager: React.FC<MenuTreeManagerProps> = ({
       c.num = String(i + 1).padStart(2, '0');
     });
     onReorderCategories(copy);
+  };
+
+  const handleMoveProduct = (catId: string, subItems: MenuItem[], prodIndex: number, direction: 'up' | 'down') => {
+    const targetIdx = direction === 'up' ? prodIndex - 1 : prodIndex + 1;
+    if (targetIdx < 0 || targetIdx >= subItems.length) return;
+
+    const reorderedSubItems = [...subItems];
+    const temp = reorderedSubItems[prodIndex];
+    reorderedSubItems[prodIndex] = reorderedSubItems[targetIdx];
+    reorderedSubItems[targetIdx] = temp;
+
+    const cat = categories.find((c) => c.id === catId);
+    if (!cat) return;
+
+    const subItemIds = new Set(subItems.map((i) => i.id));
+    const otherCatItems = (cat.items || []).filter((i) => !subItemIds.has(i.id));
+
+    const newCategoryItems = [...otherCatItems, ...reorderedSubItems];
+    onReorderProducts(catId, newCategoryItems);
   };
 
   // Filter categories and items if search query is active
@@ -424,7 +445,14 @@ export const MenuTreeManager: React.FC<MenuTreeManagerProps> = ({
                   ) : (
                     subCats.map((sub) => {
                       // Get items under this subcategory
-                      const subItems = items.filter(i => i.subCategory === sub.id || (!i.subCategory && subCats[0]?.id === sub.id));
+                      const subItems = items.filter((i) => {
+                        if (!i.subCategory) return subCats[0]?.id === sub.id;
+                        const itemSub = i.subCategory;
+                        const subId = sub.id;
+                        const itemShortSub = itemSub.includes('__') ? itemSub.split('__')[1] : itemSub;
+                        const subShortId = subId.includes('__') ? subId.split('__')[1] : subId;
+                        return itemSub === subId || itemShortSub === subShortId;
+                      });
 
                       return (
                         <div
@@ -475,13 +503,33 @@ export const MenuTreeManager: React.FC<MenuTreeManagerProps> = ({
                                 Bu alt kategoride henüz ürün yok. Sağ üstteki "+ Ürün Ekle" butonunu kullanabilirsiniz.
                               </div>
                             ) : (
-                              subItems.map((item) => (
+                              subItems.map((item, itemIdx) => (
                                 <div
                                   key={item.id}
                                   className="bg-[#0d0a08] border border-[#2a221b] hover:border-[#c8a165]/50 rounded-xl p-3 flex flex-col sm:flex-row sm:items-center justify-between gap-3 transition-all"
                                 >
                                   {/* Product Details (Image, Name, Desc) */}
                                   <div className="flex items-center gap-3">
+                                    {/* Reorder Buttons (Yukarı / Aşağı) */}
+                                    <div className="flex flex-col items-center gap-0.5 bg-[#16120f] p-1 rounded-lg border border-[#2a221b]">
+                                      <button
+                                        onClick={() => handleMoveProduct(category.id, subItems, itemIdx, 'up')}
+                                        disabled={itemIdx === 0}
+                                        className="p-0.5 text-[#a0907a] hover:text-[#c8a165] disabled:opacity-20 cursor-pointer"
+                                        title="Ürünü Yukarı Taşı"
+                                      >
+                                        <ArrowUp className="w-3 h-3" />
+                                      </button>
+                                      <button
+                                        onClick={() => handleMoveProduct(category.id, subItems, itemIdx, 'down')}
+                                        disabled={itemIdx === subItems.length - 1}
+                                        className="p-0.5 text-[#a0907a] hover:text-[#c8a165] disabled:opacity-20 cursor-pointer"
+                                        title="Ürünü Aşağı Taşı"
+                                      >
+                                        <ArrowDown className="w-3 h-3" />
+                                      </button>
+                                    </div>
+
                                     <img
                                       src={item.img}
                                       alt={item.name}

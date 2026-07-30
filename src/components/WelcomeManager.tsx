@@ -55,7 +55,7 @@ export const WelcomeManager: React.FC<WelcomeManagerProps> = ({ welcomeMedia, on
             <FileUploader
               label="Giriş Ekranı GIF / Video Dosyası (Bilgisayardan Seçin)"
               accept="image/gif,video/mp4,video/*"
-              currentValue={formData.videoUrl}
+              currentValue={formData.videoUrl ?? undefined}
               onChange={(dataUrl) => setFormData({ ...formData, videoUrl: dataUrl })}
               mediaType="video"
               description="Bilgisayarınızdan GIF veya MP4 video dosyası seçin"
@@ -122,7 +122,7 @@ export const WelcomeManager: React.FC<WelcomeManagerProps> = ({ welcomeMedia, on
           <div className="w-full max-w-xs aspect-[9/16] bg-[#0d0a08] border-4 border-[#3a2e26] rounded-[36px] overflow-hidden shadow-2xl relative flex flex-col justify-between p-6">
             
             {/* Background Media player preview */}
-            {formData.videoUrl.startsWith('data:image/gif') || formData.videoUrl.endsWith('.gif') || formData.videoUrl.includes('giphy') ? (
+            {formData.videoUrl && (formData.videoUrl.startsWith('data:image/gif') || formData.videoUrl.endsWith('.gif') || formData.videoUrl.includes('giphy')) ? (
               <img
                 src={formData.videoUrl}
                 alt="Welcome GIF"
@@ -130,7 +130,7 @@ export const WelcomeManager: React.FC<WelcomeManagerProps> = ({ welcomeMedia, on
               />
             ) : (
               <video
-                src={formData.videoUrl}
+                src={formData.videoUrl ?? undefined}
                 poster={formData.posterImg}
                 autoPlay
                 loop
