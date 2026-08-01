@@ -310,12 +310,8 @@ export function App() {
 
   // ── Welcome Media ────────────────────────────────────────────────────────────
   const handleSaveWelcome = async (updated: WelcomeMedia) => {
-    try {
-      await apiUpdateWelcome(updated);
-      setWelcomeMedia(updated);
-    } catch (err) {
-      alert(`Hata: ${err instanceof Error ? err.message : 'Karşılama medyası kaydedilemedi'}`);
-    }
+    await apiUpdateWelcome(updated);
+    setWelcomeMedia(updated);
   };
 
   // ── Store Settings ───────────────────────────────────────────────────────────

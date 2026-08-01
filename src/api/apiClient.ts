@@ -9,6 +9,22 @@ function getApiBaseUrl(): string {
   return envUrl || 'http://localhost:3001/api';
 }
 
+export function resolveMediaUrl(url?: string | null): string {
+  if (!url) return '';
+  const apiBase = getApiBaseUrl().replace(/\/api\/?$/, '');
+
+  if (url.startsWith('/uploads')) {
+    return `${apiBase}${url}`;
+  }
+
+  if (url.includes('/uploads/')) {
+    const filename = url.substring(url.indexOf('/uploads/'));
+    return `${apiBase}${filename}`;
+  }
+
+  return url;
+}
+
 function getToken(): string | null {
   return localStorage.getItem('hookahlab_jwt_token');
 }
@@ -160,6 +176,21 @@ export async function apiReorderProducts(items: { id: number; position: number }
 
 export async function apiGetWelcome() {
   const res = await fetch(`${getApiBaseUrl()}/welcome`);
+  return handleResponse(res);
+}
+
+export async function apiUploadFile(file: File): Promise<{ url: string; filename: string; originalname: string; size: number }> {
+  const token = getToken();
+  const formData = new FormData();
+  formData.append('file', file);
+  const res = await fetch(`${getApiBaseUrl()}/upload`, {
+    method: 'POST',
+    headers: {
+      ...(token ? { Authorization: `Bearer ${token}` } : {}),
+      // Do NOT set Content-Type — browser sets it with boundary automatically
+    },
+    body: formData,
+  });
   return handleResponse(res);
 }
 
